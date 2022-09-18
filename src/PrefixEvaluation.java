@@ -19,9 +19,13 @@ public class PrefixEvaluation {
          while (expression.equalsIgnoreCase("done") != true);
          scnr.close();
     }
-
+    
     public int eval(String expr) {
-    	int result = 0;
+    	return eval(0, expr).getResult();
+    }
+
+    private Result eval(int x, String expr) {
+    	Result result = null;
     	
     	Scanner parser = new Scanner(expr);
         String token = parser.next();
@@ -29,35 +33,39 @@ public class PrefixEvaluation {
         parser = new Scanner(expr);
 
         if (isNumeric(token)) {
-            result = Integer.parseInt(token);
+            result = new Result(Integer.parseInt(token), expr);
         }
         else if(token.equals("(")) {
-          ArrayList<Integer> operands = new ArrayList<Integer>();
-          token = parser.next();
-          char operator = token.charAt(0);
-          expr = expr.substring(token.length()).trim();
-          parser = new Scanner(expr);
+        	ArrayList<Integer> operands = new ArrayList<Integer>();
+        	token = parser.next();
+        	char operator = token.charAt(0);
+        	expr = expr.substring(token.length()).trim();
+        	parser = new Scanner(expr);
+        	
+        	int answer = 0;
           
-          // Collect operands recursively
-          while(!token.equals(")")) {
-        	  int operand = eval(expr);
-        	  operands.add(operand);
+        	// Collect all expressions within parens recursively
+    		while(!token.equals(")")) {
+    			result = eval(0, expr);
+    			operands.add(result.getResult());
+    			expr = result.getExpr();
         	  
-        	  expr = expr.substring(String.valueOf(operand).length()).trim();
-        	  parser = new Scanner(expr);
-        	  token = parser.next();
-          }
+    			parser = new Scanner(expr);
+    			token = parser.next();
+    		}
           
-          // Perform operation on operands. Do the first two operands
-          result = operands.get(0);
-          operands.remove(0);
+    		// Perform operation on operands. Do the first two operands
+    		answer = operands.get(0);
+    		operands.remove(0);
           
-          // Then do the rest of the operands, if any
-          for(Integer operandRight: operands) {
-        	  result = doMath(operator, result, operandRight);
-          }
-        }
-
+    		// Then do the rest of the operands, if any
+    		for(Integer operandRight: operands) {
+    			answer = doMath(operator, answer, operandRight);
+    		}
+    		
+    		expr = expr.substring(token.length()).trim();
+    		result = new Result(answer, expr);
+    	}
         
         return result;
     }
@@ -98,6 +106,24 @@ public class PrefixEvaluation {
     
     private boolean isOperator(char val) {
     	return val == '+' || val == '-' || val == '/' || val == '*';
+    }
+    
+    class Result {
+    	private int result;
+    	private String expr;
+    	
+    	public Result(int r, String e) {
+    		this.result = r;
+    		this.expr = e;
+    	}
+    	
+    	public int getResult() {
+    		return result;
+    	}
+    	
+    	public String getExpr() {
+    		return expr;
+    	}
     }
 }
 
