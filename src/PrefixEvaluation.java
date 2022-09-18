@@ -11,20 +11,26 @@ public class PrefixEvaluation {
         
         System.out.println("Prefix Evaluation – Brandon Baker");
         
-         do {  
+         while(true) {  
              System.out.print("\nEnter an expression: ");
              expression = scnr.nextLine();
-             System.out.println(prefixEvaluator.eval(expression));
+             if(!expression.equalsIgnoreCase("done")) {
+            	 System.out.println(prefixEvaluator.eval(expression));
+             }
+             else {
+            	 break;
+             }
          }
-         while (expression.equalsIgnoreCase("done") != true);
          scnr.close();
+         
+         System.out.print("\nGoodbye!");
     }
     
     public int eval(String expr) {
-    	return eval(0, expr).getResult();
+    	return evaluate(expr).getResult();
     }
 
-    private Result eval(int x, String expr) {
+    private Result evaluate(String expr) {
     	Result result = null;
     	
     	Scanner parser = new Scanner(expr);
@@ -46,7 +52,7 @@ public class PrefixEvaluation {
           
         	// Collect all expressions within parens recursively
     		while(!token.equals(")")) {
-    			result = eval(0, expr);
+    			result = evaluate(expr);
     			operands.add(result.getResult());
     			expr = result.getExpr();
         	  
